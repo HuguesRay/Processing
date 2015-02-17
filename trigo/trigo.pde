@@ -26,7 +26,7 @@ void draw() {
 			// println(height/2+radius/2);
 
 			float angle2=choix[(int) random(choix.length)];
-			if(angle2==0 || angle2==180) length = 50/((Math.abs(width/2-posy)/10));
+			if(angle2==0 || angle2==180) length = 50/((Math.abs(height/2-posy)/10));
 			if(angle2==90 || angle2==270) length = 50/((Math.abs(width/2-posx)/10));
 
 			
