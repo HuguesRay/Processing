@@ -47,26 +47,32 @@ public void setup() {
 
 public void draw() {
 
-  background(255);
-  tracker.track();
-  tracker.display();
-  selector = tracker.getLerpedPos();
+ 	background(255);
+ 	tracker.track();
+  	tracker.display();
+  	selector = tracker.getLerpedPos();
 
-	v2 = tracker.getLerpedPos();
-	println(v1);
-	println(v2);
-	if(v2.dist(v1)>10) {
-		println("mouvement");
-		v1=v2;
-		p=0;
-		anim=false;
-		progress=0;
-	}
-	else {
+	fill(48,128,219);
+	rect(width-50,height-50, 50,50);
+	rect(0,0, 50,50);
+	rect(0,height-50, 50,50);
+	rect(width-50,0, 50,50);
+	int target = get((int) selector.x, (int) selector.y);
+	
+	//println(target);
+
+	v2 = new PVector(mouseX,mouseY);
+	if(target == -13598501) {
 		p++;
 		if(p>=20) {
 			selectionner();
 		}
+	}
+	else {
+		v1=v2;
+		p=0;
+		anim=false;
+		progress=0;
 	}
 	noStroke();
 	fill(255);
@@ -82,7 +88,7 @@ public void selectionner() {
 
 public void animation() {
 	if(anim==true) {
-		progress++;
+		progress=progress+5;
 		strokeCap(SQUARE);
 		noFill();
 		stroke(255);
