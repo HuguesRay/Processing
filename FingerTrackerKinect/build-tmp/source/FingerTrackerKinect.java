@@ -1,7 +1,26 @@
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
+
+import fingertracker.*; 
+import SimpleOpenNI.*; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class FingerTrackerKinect extends PApplet {
+
 // import the fingertracker library
 // and the SimpleOpenNI library for Kinect access
-import fingertracker.*;
-import SimpleOpenNI.*;
+
+
 
 // declare FignerTracker and SimpleOpenNI objects
 FingerTracker fingers;
@@ -10,7 +29,7 @@ SimpleOpenNI kinect;
 // 625 corresponds to about 2-3 feet from the Kinect
 int threshold = 625;
 
-void setup() {
+public void setup() {
   size(640, 480);
   background(30,131,232);
   // initialize your SimpleOpenNI object
@@ -31,7 +50,7 @@ void setup() {
   fingers.setMeltFactor(100);
 }
 
-void draw() {
+public void draw() {
   // get new depth data from the kinect
   kinect.update();
   // get a depth image and display it
@@ -73,12 +92,21 @@ void draw() {
 // keyPressed event:
 // pressing the '-' key lowers the threshold by 10
 // pressing the '+/=' key increases it by 10 
-void keyPressed(){
+public void keyPressed(){
   if(key == '-'){
     threshold -= 10;
   }
   
   if(key == '='){
     threshold += 10;
+  }
+}
+  static public void main(String[] passedArgs) {
+    String[] appletArgs = new String[] { "FingerTrackerKinect" };
+    if (passedArgs != null) {
+      PApplet.main(concat(appletArgs, passedArgs));
+    } else {
+      PApplet.main(appletArgs);
+    }
   }
 }
