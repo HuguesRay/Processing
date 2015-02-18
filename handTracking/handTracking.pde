@@ -21,7 +21,7 @@ void setup() {
 	anim=false;
 	v1 = new PVector(0,0);
 	//kinect.start();
-	//kinect.enableRGB(true);
+	kinect.enableRGB(true);
  	// kinect.enableIR(true);
     kinect.enableDepth(true);
 }
@@ -31,6 +31,12 @@ void draw() {
  	background(255);
  	tracker.track();
   	tracker.display();
+  	PImage img = kinect.getVideoImage();
+  	pushMatrix(); 
+	scale(-1,1); 
+	image(img,-width,0); 
+	popMatrix(); 
+  	
   	selector = tracker.getLerpedPos();
 
 	fill(48,128,219);
