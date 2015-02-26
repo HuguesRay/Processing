@@ -23,7 +23,6 @@ PeasyCam cam;
  
 
 int counter = 0;
-float theta1 = 0;
 
 public void setup() 
 {
@@ -40,18 +39,26 @@ public void setup()
  
 public void draw()
 {
-	 background(255);
-  stroke(0);
-  fill(175);
-  rectMode(CENTER);
-  
-  translate(50,50);
-  rotateZ(theta1);
-  rect(0,0,60,60);
-  
-  theta1 += 0.02f;
+	background(100, 100, 150);
+	
+	// noStroke();
+	
+	fill(227,227,5);
+	translate(width/2, height/2);
+	sphere(100);
 
+	// pushMatrix();
+	fill(181,110,11);
+	translate(width/3, height/3);
+	sphere(20);
+	translate(width/2, height/2);
+	counter++;
+	rotateY(millis()*0.001f * TWO_PI/10);
+	// popMatrix();
 
+	// fill(0,70,191);
+	// translate(width/4, height/4);
+	// sphere(30);
 }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "sphere" };
