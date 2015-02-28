@@ -19,7 +19,7 @@ public class growth extends PApplet {
 
 
 
-PeasyCam cam;
+//PeasyCam cam;
 
 
 int maxCount = 5000;
@@ -30,13 +30,13 @@ float[] y = new float[maxCount];
 float[] r = new float[maxCount];
 
 public void setup() {
-	size(1336,720, P3D);
+	size(1336,720);
 	background(0);
 	smooth();
 
-	cam = new PeasyCam(this, 100);
-  cam.setMinimumDistance(50);
-  cam.setMaximumDistance(500);
+//	cam = new PeasyCam(this, 100);
+  //cam.setMinimumDistance(50);
+ // cam.setMaximumDistance(500);
 
 	x[0] = width/2;
 	y[0] = height/2;
