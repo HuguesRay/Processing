@@ -43,13 +43,16 @@ public void draw() {
 		fill(0,0,0,255);
 		// fill(0,0,0,(myNodes[i].velocity.x)*100);
 		ellipse(myNodes[i].x, myNodes[i].y,5,5);
-		// if(dist(myNodes[i].x, myNodes[i].y, mouseX, mouseY)<radius) {
-		// 	stroke(0,200);
-		// 	strokeWeight(1);
-		// 	line(myNodes[i].x, myNodes[i].y, mouseX, mouseY);
-		// }
 	}
 }
+public void mouseWheel(MouseEvent event) {
+	float e = event.getCount();
+	println(e);
+	if(e < 0)radius -= 5;
+	else radius += 5;
+	myAttractor.r = radius;
+}
+
 
 class Node extends PVector {
 	PVector velocity = new PVector();
@@ -90,7 +93,7 @@ class Attractor {
 		float d = mag(dx,dy);
 		if(d>0 && d<r) {
 			float s = d/r;
-			float force = 1/pow(s,0.5f)-1;
+			float force = 1/pow(s,0.9f)-1;
 			force = force/r;
 			theNode.velocity.x += dx * force;
 			theNode.velocity.y += dy * force;
