@@ -60,7 +60,7 @@ public void setup() {
 	size(N,N);
 	//scale(2);
 	frameRate(30);
-	deg = 15;
+	deg = 29;
 	fimg = new float[N][N][4];
 	ma = toMouse(a); mb = toMouse(b); mc = toMouse(c); md = toMouse(d);
 	kinect = new Kinect(this);
@@ -283,7 +283,7 @@ class KinectTracker {
   // Size of kinect image
   int kw = 640;
   int kh = 480;
-  int threshold = 500;
+  int threshold = 640;
 
   // Raw location
   PVector loc;
