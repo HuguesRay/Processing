@@ -39,7 +39,7 @@ float diffR = 0;
 float diffG = 0;
 float diffB = 0;
 int[] colorSet = new int[6];
-float gridSize = 480;
+float gridSize = 768;
 Node[] myNodes = new Node[xCount*yCount];
 
 //-------declaration variables pour tracking kinect------
@@ -55,8 +55,8 @@ int[]       userClr = new int[]{ color(255,0,0),
                                    };
 
 public void setup() {
-	// size(1024, 768);
-	size(640,480);
+	size(1024, 768);
+	// size(640,480);
 
 	colorSet[0] = color(222,4,4);
 	colorSet[1] = color(222,4,215);
@@ -89,6 +89,7 @@ public void setup() {
 public void draw() {
 	context.update();
 	// overwritten by background***
+	scale(1.6f);
 	// image(context.depthImage(),0,0);
 	//--------draw visual----------
 	// println(mouseX);
@@ -135,9 +136,10 @@ public void draw() {
         p = vecList.get(0);
         context.convertRealWorldToProjective(p,p2d);
         point(p2d.x,p2d.y);
-        // println(myAttractors.get(handId-1));
+        // println(myAttractors.get(handId-1).z);
         myAttractors.get(handId-1).x = p2d.x;
 		myAttractors.get(handId-1).y = p2d.y;
+		myAttractors.get(handId-1).r = p2d.z/4;
 		// println(myAttractor.x);
 		ellipse(myAttractors.get(handId-1).x, myAttractors.get(handId-1).y, myAttractors.get(handId-1).r*2, myAttractors.get(handId-1).r*2);
 		if(index >= 10) {
@@ -275,7 +277,7 @@ public void onNewHand(SimpleOpenNI curContext,int handId,PVector pos)
   
   handPathList.put(handId,vecList);
   println(handId);
-  myAttractors.add(new Attractor(pos.x,pos.y, radius));
+  myAttractors.add(new Attractor(pos.x,pos.y, pos.z));
 }
 
 public void onTrackedHand(SimpleOpenNI curContext,int handId,PVector pos)
@@ -330,8 +332,16 @@ public void keyPressed()
 }
 
 class Attractor {
-	float x=0, y=0;
+	float x=0, y=0, z=0;
 	float r = 150;
+
+
+	Attractor(float theX, float theY, float theZ) {
+		println("new attractor!");
+		x = theX;
+		y = theY;
+		r = theZ/4;
+	}
 
 	Attractor(float theX, float theY, int radius) {
 		println("new attractor!");

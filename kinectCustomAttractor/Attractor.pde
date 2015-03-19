@@ -1,6 +1,14 @@
 class Attractor {
-	float x=0, y=0;
+	float x=0, y=0, z=0;
 	float r = 150;
+
+
+	Attractor(float theX, float theY, float theZ) {
+		println("new attractor!");
+		x = theX;
+		y = theY;
+		r = theZ/4;
+	}
 
 	Attractor(float theX, float theY, int radius) {
 		println("new attractor!");
