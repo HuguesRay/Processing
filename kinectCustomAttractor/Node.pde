@@ -21,4 +21,8 @@ class Node extends PVector {
 		if(y>maxY) velocity.y *= -1;
 		if(y<minY) velocity.y *= -1;
 	}
+	void reduce() {
+		velocity.x -= velocity.x/10;
+		velocity.y -= velocity.y/10;
+	}
 }

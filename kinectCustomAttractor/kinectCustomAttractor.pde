@@ -1,11 +1,15 @@
+//-------importation---------
+import java.util.Map;
+import java.util.Iterator;
+import SimpleOpenNI.*;
 
-Attractor myAttractor;
-Attractor myHelper;
-int radius = 350;
+//--------declaration de variables basic--------
+ArrayList<Attractor> myAttractors = new ArrayList<Attractor>();
+int radius = 150;
 int sensX = 1;
 int sensY = 1;
-int xCount = 44;
-int yCount = 40;
+int xCount = 34;
+int yCount = 30;
 int randomColorIndex = 3;
 int index = 0;
 float r = 150;
@@ -15,15 +19,25 @@ float diffR = 0;
 float diffG = 0;
 float diffB = 0;
 color[] colorSet = new color[6];
-float gridSize = 768;
+float gridSize = 480;
 Node[] myNodes = new Node[xCount*yCount];
 
-void setup() {
-	size(1024, 768);
-	noCursor();
+//-------declaration variables pour tracking kinect------
+SimpleOpenNI context;
+int handVecListSize = 20;
+Map<Integer,ArrayList<PVector>>  handPathList = new HashMap<Integer,ArrayList<PVector>>();
+color[]       userClr = new color[]{ color(255,0,0),
+                                     color(0,255,0),
+                                     color(0,0,255),
+                                     color(255,255,0),
+                                     color(255,0,255),
+                                     color(0,255,255)
+                                   };
 
-	myAttractor = new Attractor(width/2, height/2, radius);
-	myHelper = new Attractor(0, 0);
+void setup() {
+	// size(1024, 768);
+	size(640,480);
+
 	colorSet[0] = color(222,4,4);
 	colorSet[1] = color(222,4,215);
 	colorSet[2] = color(12,4,222);
@@ -31,47 +45,106 @@ void setup() {
 	colorSet[4] = color(237,230,9);
 	colorSet[5] = color(237,230,9);
 	initGrid();
+
+	//------setup contect simpleNI-----
+	context = new SimpleOpenNI(this);
+  	if(context.isInit() == false)
+  	{
+    	println("Can't init SimpleOpenNI, maybe the camera is not connected!"); 
+   		exit();
+    	return;  
+	}
+	// enable depthMap generation 
+	context.enableDepth();
+  
+	// disable mirror
+	context.setMirror(true);
+
+	// enable hands + gesture generation
+	//context.enableGesture();
+	context.enableHand();
+	context.startGesture(SimpleOpenNI.GESTURE_WAVE);
 }
 
 void draw() {
+	context.update();
+	// overwritten by background***
+	// image(context.depthImage(),0,0);
+	//--------draw visual----------
 	// println(mouseX);
 	background(0);
 	noFill();
 	stroke(255,30);
 	strokeWeight(2);
-	ellipse(mouseX, mouseY, myAttractor.r*2, myAttractor.r*2);
-	ellipse(myHelper.x, myHelper.y, myHelper.r*2, myHelper.r*2);
-	myAttractor.x = mouseX;
-	myAttractor.y = mouseY;
 
-	if(myHelper.x>width-5) {
-		sensX = -1;
-	}
-	if(myHelper.x<5) {
-		sensX = 1;
-	}
-	if(myHelper.y>height-5) {
-		sensY = -1;
-	}
-	if(myHelper.y<5) {
-		sensY = 1;
-	}
-	myHelper.x = myHelper.x+sensX;
-	myHelper.y = myHelper.y+sensY;
 	if(index >= 10) {
 		index = 0;
 		fill(randomColor());
 	}
 	else fill(getColor());
-	for(int i=0; i<myNodes.length; i++) {
+	
+	index++;
+	// draw the tracked hands
+  if(handPathList.size() > 0)  
+  {    
+    Iterator itr = handPathList.entrySet().iterator();  
+    while(itr.hasNext())
+    {
+      Map.Entry mapEntry = (Map.Entry)itr.next(); 
+      int handId =  (Integer)mapEntry.getKey();
+      ArrayList<PVector> vecList = (ArrayList<PVector>)mapEntry.getValue();
+      PVector p;
+      PVector p2d = new PVector();
+      
+        stroke(userClr[ (handId - 1) % userClr.length ]);
+        noFill(); 
+        strokeWeight(1);        
+        Iterator itrVec = vecList.iterator(); 
+        beginShape();
+          while( itrVec.hasNext() ) 
+          { 
+            p = (PVector) itrVec.next(); 
+            
+            context.convertRealWorldToProjective(p,p2d);
+            vertex(p2d.x,p2d.y);
+          }
+        endShape();   
+  
+        stroke(userClr[ (handId - 1) % userClr.length ]);
+        strokeWeight(4);
+        p = vecList.get(0);
+        context.convertRealWorldToProjective(p,p2d);
+        point(p2d.x,p2d.y);
+        // println(myAttractors.get(handId-1));
+        myAttractors.get(handId-1).x = p2d.x;
+		myAttractors.get(handId-1).y = p2d.y;
+		// println(myAttractor.x);
+		ellipse(myAttractors.get(handId-1).x, myAttractors.get(handId-1).y, myAttractors.get(handId-1).r*2, myAttractors.get(handId-1).r*2);
+		if(index >= 10) {
+			index = 0;
+			fill(randomColor());
+		}
+		else fill(getColor());
+		
+		index++;
+		for(int i=0; i<myNodes.length; i++) {
+			noStroke();
+			myAttractors.get(handId-1).attract(myNodes[i]);
+			myNodes[i].update();
+			// fill(0,0,0,(myNodes[i].velocity.x)*100);
+			ellipse(myNodes[i].x, myNodes[i].y,5,5);
+		}
+    }        
+  }
+  else {
+  	for(int i=0; i<myNodes.length; i++) {
 		noStroke();
-		myAttractor.attract(myNodes[i]);
-		myHelper.attract(myNodes[i]);
 		myNodes[i].update();
+		myNodes[i].reduce();
 		// fill(0,0,0,(myNodes[i].velocity.x)*100);
 		ellipse(myNodes[i].x, myNodes[i].y,5,5);
 	}
-	index++;
+  }
 }
 
 void initGrid() {
@@ -90,7 +163,7 @@ void mouseWheel(MouseEvent event) {
 	float e = event.getCount();
 	if(e < 0)radius += 5;
 	else radius -= 5;
-	myAttractor.r = radius;
+	// myAttractor.r = radius;
 	// myHelper.r = radius;
 }
 int signum(float f) {
@@ -170,5 +243,69 @@ color getColor() {
 	// println("retourne couleur");
 	return color(r,g,b,255);
 }
+// -----------------------------------------------------------------
+// hand events
 
+void onNewHand(SimpleOpenNI curContext,int handId,PVector pos)
+{
+  println("onNewHand - handId: " + handId + ", pos: " + pos);
+ 
+  ArrayList<PVector> vecList = new ArrayList<PVector>();
+  vecList.add(pos);
+  
+  handPathList.put(handId,vecList);
+  println(handId);
+  myAttractors.add(new Attractor(pos.x,pos.y, radius));
+}
+
+void onTrackedHand(SimpleOpenNI curContext,int handId,PVector pos)
+{
+  //println("onTrackedHand - handId: " + handId + ", pos: " + pos );
+  
+  ArrayList<PVector> vecList = handPathList.get(handId);
+  if(vecList != null)
+  {
+    vecList.add(0,pos);
+    if(vecList.size() >= handVecListSize)
+      // remove the last point 
+      vecList.remove(vecList.size()-1); 
+  }  
+}
+
+void onLostHand(SimpleOpenNI curContext,int handId)
+{
+  println("onLostHand - handId: " + handId);
+  handPathList.remove(handId);
+  // myAttractors.remove(handId);
+}
+
+// -----------------------------------------------------------------
+// gesture events
+
+void onCompletedGesture(SimpleOpenNI curContext,int gestureType, PVector pos)
+{
+  println("onCompletedGesture - gestureType: " + gestureType + ", pos: " + pos);
+  
+  int handId = context.startTrackingHand(pos);
+  println("hand stracked: " + handId);
+}
+
+// -----------------------------------------------------------------
+// Keyboard event
+void keyPressed()
+{
+
+  switch(key)
+  {
+  case ' ':
+    context.setMirror(!context.mirror());
+    break;
+  case '1':
+    context.setMirror(true);
+    break;
+  case '2':
+    context.setMirror(false);
+    break;
+  }
+}
 

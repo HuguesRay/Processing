@@ -3,6 +3,7 @@ class Attractor {
 	float r = 150;
 
 	Attractor(float theX, float theY, int radius) {
+		println("new attractor!");
 		x = theX;
 		y = theY;
 		r = radius;
@@ -23,8 +24,9 @@ class Attractor {
 			theNode.velocity.y += dy * force;
 		}
 		else {
-			theNode.velocity.x -= theNode.velocity.x/50;
-			theNode.velocity.y -= theNode.velocity.y/50;
+			// theNode.velocity.x -= theNode.velocity.x/50;
+			// theNode.velocity.y -= theNode.velocity.y/50;
+			theNode.reduce();
 		}
 	}
 }
