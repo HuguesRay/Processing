@@ -27,4 +27,17 @@ class Attractor {
 			theNode.velocity.y -= theNode.velocity.y/50;
 		}
 	}
+	int inRange(Node theNode) {
+		float dx = x - theNode.x;
+		float dy = y - theNode.y;
+		float d = mag(dx,dy);
+		if(d>0 && d<r) return 1;
+		else return 0;
+	}
+	float getRange(Node theNode) {
+		float dx = x - theNode.x;
+		float dy = y - theNode.y;
+		float d = mag(dx,dy);
+		return d;
+	}
 }

@@ -3,6 +3,9 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
+import ddf.minim.*; 
+import ddf.minim.ugens.*; 
+
 import java.util.HashMap; 
 import java.util.ArrayList; 
 import java.io.File; 
@@ -14,6 +17,12 @@ import java.io.IOException;
 
 public class CustomAttractor extends PApplet {
 
+
+
+ 
+Minim       minim;
+AudioOutput out;
+Oscil       wave;
 
 Attractor myAttractor;
 Attractor myHelper;
@@ -38,6 +47,11 @@ public void setup() {
 	size(1024, 768);
 	noCursor();
 
+	minim = new Minim(this);
+	out = minim.getLineOut();
+	wave = new Oscil( 440, 0.5f, Waves.SINE );
+	wave.patch( out );
+
 	myAttractor = new Attractor(width/2, height/2, radius);
 	myHelper = new Attractor(0, 0);
 	colorSet[0] = color(222,4,4);
@@ -50,7 +64,6 @@ public void setup() {
 }
 
 public void draw() {
-	// println(mouseX);
 	background(0);
 	noFill();
 	stroke(255,30);
@@ -72,22 +85,38 @@ public void draw() {
 	if(myHelper.y<5) {
 		sensY = 1;
 	}
-	myHelper.x = myHelper.x+sensX;
-	myHelper.y = myHelper.y+sensY;
+	// myHelper.x = myHelper.x+sensX;
+	// myHelper.y = myHelper.y+sensY;
 	if(index >= 10) {
 		index = 0;
 		fill(randomColor());
 	}
 	else fill(getColor());
+	int numbInRange = 0;
+	float averageVelocity = 0;
 	for(int i=0; i<myNodes.length; i++) {
 		noStroke();
 		myAttractor.attract(myNodes[i]);
 		myHelper.attract(myNodes[i]);
 		myNodes[i].update();
+		numbInRange += myAttractor.inRange(myNodes[i]);
 		// fill(0,0,0,(myNodes[i].velocity.x)*100);
-		ellipse(myNodes[i].x, myNodes[i].y,5,5);
+		if(myAttractor.getRange(myNodes[i]) > radius-5 && myAttractor.getRange(myNodes[i]) < radius + 5) {
+			ellipse(myNodes[i].x, myNodes[i].y,10,10);
+		}
+		else {
+			ellipse(myNodes[i].x, myNodes[i].y,5,5);
+		}
+		
+		averageVelocity += (Math.abs(myNodes[i].velocity.x) + Math.abs(myNodes[i].velocity.y))/2;
 	}
 	index++;
+	averageVelocity = averageVelocity/numbInRange;
+	float freq = map( averageVelocity, -4, 10, 50, 520 );
+	float amp = map( numbInRange+300, 0, xCount*yCount, 0f, 1f );
+	wave.setAmplitude( amp );
+  	if(freq < 9999) wave.setFrequency( freq );
+  	// println();
 }
 
 public void initGrid() {
@@ -216,6 +245,19 @@ class Attractor {
 			theNode.velocity.x -= theNode.velocity.x/50;
 			theNode.velocity.y -= theNode.velocity.y/50;
 		}
+	}
+	public int inRange(Node theNode) {
+		float dx = x - theNode.x;
+		float dy = y - theNode.y;
+		float d = mag(dx,dy);
+		if(d>0 && d<r) return 1;
+		else return 0;
+	}
+	public float getRange(Node theNode) {
+		float dx = x - theNode.x;
+		float dy = y - theNode.y;
+		float d = mag(dx,dy);
+		return d;
 	}
 }
 class Node extends PVector {
