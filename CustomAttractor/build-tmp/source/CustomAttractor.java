@@ -5,6 +5,7 @@ import processing.opengl.*;
 
 import ddf.minim.*; 
 import ddf.minim.ugens.*; 
+import ddf.minim.signals.*; 
 
 import java.util.HashMap; 
 import java.util.ArrayList; 
@@ -19,10 +20,13 @@ public class CustomAttractor extends PApplet {
 
 
 
+
  
 Minim       minim;
 AudioOutput out;
 Oscil       wave;
+Noise		noize;
+WhiteNoise	wn;
 
 Attractor myAttractor;
 Attractor myHelper;
@@ -50,6 +54,9 @@ public void setup() {
 	minim = new Minim(this);
 	out = minim.getLineOut();
 	wave = new Oscil( 440, 0.5f, Waves.SINE );
+	noize = new Noise(440, Noise.Tint.WHITE);
+	wn = new WhiteNoise(0.5f);
+	// out.addSignal(wn);
 	wave.patch( out );
 
 	myAttractor = new Attractor(width/2, height/2, radius);
@@ -111,12 +118,17 @@ public void draw() {
 		averageVelocity += (Math.abs(myNodes[i].velocity.x) + Math.abs(myNodes[i].velocity.y))/2;
 	}
 	index++;
-	averageVelocity = averageVelocity/numbInRange;
-	float freq = map( averageVelocity, -4, 10, 50, 520 );
-	float amp = map( numbInRange+300, 0, xCount*yCount, 0f, 1f );
+	float averageVelocity2 = averageVelocity/numbInRange;
+	float freq = map( averageVelocity2, -4, 10, 50, 520 );
+	// float freq = map( averageVelocity, 0, 10000, 0, 0.6 );
+	// float amp = map( numbInRange+300, 0, xCount*yCount, 0f, 1f );
+	float amp = map( averageVelocity, 3000, 10000, 0f, 0.6f );
+	println(averageVelocity);
 	wave.setAmplitude( amp );
+	// noize.setAmp( amp );
+	wn.setAmp(freq);
   	if(freq < 9999) wave.setFrequency( freq );
-  	// println();
+  	// println(freq);
 }
 
 public void initGrid() {
