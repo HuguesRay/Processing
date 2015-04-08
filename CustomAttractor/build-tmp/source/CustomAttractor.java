@@ -123,12 +123,9 @@ public void draw() {
 	// float freq = map( averageVelocity, 0, 10000, 0, 0.6 );
 	// float amp = map( numbInRange+300, 0, xCount*yCount, 0f, 1f );
 	float amp = map( averageVelocity, 3000, 10000, 0f, 0.6f );
-	println(averageVelocity);
 	wave.setAmplitude( amp );
-	// noize.setAmp( amp );
 	wn.setAmp(freq);
   	if(freq < 9999) wave.setFrequency( freq );
-  	// println(freq);
 }
 
 public void initGrid() {
