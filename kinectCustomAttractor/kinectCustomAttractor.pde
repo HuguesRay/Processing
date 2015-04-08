@@ -2,14 +2,17 @@
 import java.util.Map;
 import java.util.Iterator;
 import SimpleOpenNI.*;
+import ddf.minim.*;
+import ddf.minim.ugens.*;
+import ddf.minim.signals.*;
 
 //--------declaration de variables basic--------
 ArrayList<Attractor> myAttractors = new ArrayList<Attractor>();
 int radius = 150;
 int sensX = 1;
 int sensY = 1;
-int xCount = 34;
-int yCount = 30;
+int xCount = 44;
+int yCount = 40;
 int randomColorIndex = 3;
 int index = 0;
 float r = 150;
@@ -21,6 +24,11 @@ float diffB = 0;
 color[] colorSet = new color[6];
 float gridSize = 768;
 Node[] myNodes = new Node[xCount*yCount];
+
+/*-------declaration de variable liées a minim---*/
+Minim       minim;
+AudioOutput out;
+Oscil       wave;
 
 //-------declaration variables pour tracking kinect------
 SimpleOpenNI context;
@@ -35,8 +43,8 @@ color[]       userClr = new color[]{ color(255,0,0),
                                    };
 
 void setup() {
-	size(1024, 768);
-	// size(640,480);
+	// size(1024, 768);
+	size(640,480);
 
 	colorSet[0] = color(222,4,4);
 	colorSet[1] = color(222,4,215);
@@ -46,6 +54,11 @@ void setup() {
 	colorSet[5] = color(237,230,9);
 	initGrid();
 
+	//-------setup minim-------//
+	minim = new Minim(this);
+	out = minim.getLineOut();
+	wave = new Oscil( 440, 0f, Waves.SINE );
+	wave.patch( out );
 	//------setup contect simpleNI-----
 	context = new SimpleOpenNI(this);
   	if(context.isInit() == false)
@@ -69,11 +82,10 @@ void setup() {
 void draw() {
 	context.update();
 	// overwritten by background***
-	scale(1.6);
-	// image(context.depthImage(),0,0);
+	// scale(1.6);
+	image(context.depthImage(),0,0);
 	//--------draw visual----------
-	// println(mouseX);
-	background(0);
+	// background(0);
 	noFill();
 	stroke(255,30);
 	strokeWeight(2);
@@ -116,12 +128,15 @@ void draw() {
         p = vecList.get(0);
         context.convertRealWorldToProjective(p,p2d);
         point(p2d.x,p2d.y);
-        // println(myAttractors.get(handId-1).z);
-        myAttractors.get(handId-1).x = p2d.x;
-		myAttractors.get(handId-1).y = p2d.y;
-		myAttractors.get(handId-1).r = p2d.z/4;
-		// println(myAttractor.x);
-		ellipse(myAttractors.get(handId-1).x, myAttractors.get(handId-1).y, myAttractors.get(handId-1).r*2, myAttractors.get(handId-1).r*2);
+
+
+ //------- tracking des mains------------//
+ 		Attractor curAtt = myAttractors.get(handId-1);
+        curAtt.x = p2d.x;
+		curAtt.y = p2d.y;
+		curAtt.r = p2d.z/4;
+		strokeWeight(1);
+		ellipse(curAtt.x, curAtt.y, curAtt.r*2, curAtt.r*2);
 		if(index >= 10) {
 			index = 0;
 			fill(randomColor());
@@ -129,16 +144,34 @@ void draw() {
 		else fill(getColor());
 		
 		index++;
+		int numbInRange = 0;
+		float averageVelocity = 0;
 		for(int i=0; i<myNodes.length; i++) {
 			noStroke();
-			myAttractors.get(handId-1).attract(myNodes[i]);
+			curAtt.attract(myNodes[i]);
 			myNodes[i].update();
-			// fill(0,0,0,(myNodes[i].velocity.x)*100);
-			ellipse(myNodes[i].x, myNodes[i].y,5,5);
+			numbInRange += curAtt.inRange(myNodes[i]);
+			if(curAtt.getRange(myNodes[i]) > curAtt.r-5 && curAtt.getRange(myNodes[i]) < curAtt.r + 5) {
+				ellipse(myNodes[i].x, myNodes[i].y,10,10);
+			}
+			else {
+				ellipse(myNodes[i].x, myNodes[i].y,5,5);
+			}
+			averageVelocity += (Math.abs(myNodes[i].velocity.x) + Math.abs(myNodes[i].velocity.y))/2;
 		}
+		//---------- frequence & amplitude -------------//
+		float averageVelocity2 = averageVelocity/numbInRange;
+		float freq = map( averageVelocity2, -4, 10, 50, 520 );
+		// float freq = map( averageVelocity, 0, 10000, 0, 0.6 );
+		// float amp = map( numbInRange+300, 0, xCount*yCount, 0f, 1f );
+		float amp = map( averageVelocity, 550, 1000, 0f, 0.6f );
+		wave.setAmplitude( amp );
+		// wn.setAmp(freq);
+	  	if(freq < 9999) wave.setFrequency( freq );
     }        
   }
   else {
+  	wave.setAmplitude( 0 );
   	for(int i=0; i<myNodes.length; i++) {
 		noStroke();
 		myNodes[i].update();
