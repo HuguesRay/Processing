@@ -31,6 +31,7 @@ AudioOutput out;
 Oscil       wave;
 
 //-------declaration variables pour tracking kinect------
+boolean depthImage = false;
 SimpleOpenNI context;
 int handVecListSize = 20;
 Map<Integer,ArrayList<PVector>>  handPathList = new HashMap<Integer,ArrayList<PVector>>();
@@ -83,9 +84,10 @@ void draw() {
 	context.update();
 	// overwritten by background***
 	// scale(1.6);
-	image(context.depthImage(),0,0);
+	
 	//--------draw visual----------
-	// background(0);
+	if(depthImage) image(context.depthImage(),0,0);
+	else background(0);
 	noFill();
 	stroke(255,30);
 	strokeWeight(2);
@@ -336,10 +338,10 @@ void keyPressed()
     context.setMirror(!context.mirror());
     break;
   case '1':
-    context.setMirror(true);
+    depthImage = false;
     break;
   case '2':
-    context.setMirror(false);
+    depthImage = true;
     break;
   }
 }
